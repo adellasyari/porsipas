@@ -7,8 +7,6 @@
  * dipanggil agar Laravel membacanya sebelum service providers diregistrasi.
  */
 
-define('LARAVEL_START', microtime(true));
-
 // ─── LANGKAH 1: Override env vars dengan 3 metode sekaligus ─────────────────
 // putenv()  → dibaca PHP
 // $_ENV     → dibaca Dotenv/Illuminate

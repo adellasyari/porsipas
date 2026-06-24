@@ -8,7 +8,14 @@
   },
   "routes": [
     {
-      "src": "^/((?!build/|css/|js/|images/|favicon\\.ico|robots\\.txt).*)$",
+      "src": "^/$|^/index\\.php$",
+      "dest": "/api/index.php"
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/(.*)",
       "dest": "/api/index.php"
     }
   ]

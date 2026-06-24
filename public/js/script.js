@@ -309,14 +309,19 @@ document.addEventListener('DOMContentLoaded', () => {
     /** Buka overlay + cegah scroll halaman */
     function openModal(modalEl) {
         if (!modalEl) return;
+        // Pastikan inline-style tidak menghalangi; serahkan visibilitas ke CSS melalui kelas `active`
         modalEl.style.display = 'flex';
+        modalEl.classList.add('active');
         document.body.style.overflow = 'hidden';
     }
 
     /** Tutup semua modal + kembalikan scroll */
     function closeAllModals() {
         [modalQris, modalBank].forEach(m => {
-            if (m) m.style.display = 'none';
+            if (m) {
+                m.classList.remove('active');
+                m.style.display = 'none';
+            }
         });
         document.body.style.overflow = '';
     }

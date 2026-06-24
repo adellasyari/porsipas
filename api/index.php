@@ -11,6 +11,12 @@
 
 define('LARAVEL_START', microtime(true));
 
+// ─── PAKSA HTTPS ─────────────────────────────────────────────────────────────
+// Vercel menjalankan PHP di belakang proxy HTTPS. Tanpa ini, asset() akan
+// menghasilkan URL http:// yang diblokir browser sebagai Mixed Content.
+$_SERVER['HTTPS'] = 'on';
+$_SERVER['HTTP_X_FORWARDED_PROTO'] = 'https';
+
 // ─── BAGIAN 1: Layani file statis dari public/ secara langsung ──────────────
 $requestUri = $_SERVER['REQUEST_URI'] ?? '/';
 $requestPath = parse_url($requestUri, PHP_URL_PATH);

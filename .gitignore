@@ -15,6 +15,7 @@
 /node_modules
 
 /public/hot
+/public/index.php
 /public/storage
 /storage/*.key
 /storage/pail

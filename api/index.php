@@ -2,48 +2,50 @@
 
 /**
  * PorsiPas – Vercel Serverless Entry Point
- *
- * PENTING: Semua override environment HARUS dilakukan sebelum autoloader
- * dipanggil agar Laravel membacanya sebelum service providers diregistrasi.
+ * Pendekatan paling solid untuk Laravel 11/12 di Vercel
  */
 
-// ─── LANGKAH 1: Override env vars dengan 3 metode sekaligus ─────────────────
-// putenv()  → dibaca PHP
-// $_ENV     → dibaca Dotenv/Illuminate
-// $_SERVER  → fallback untuk beberapa environment
-$overrides = [
-    'APP_ENV'                    => 'production',
-    'APP_DEBUG'                  => 'false',
-    'LOG_CHANNEL'                => 'stderr',
-    'LOG_DEPRECATIONS_CHANNEL'   => 'null',
-    'CACHE_STORE'                => 'array',
-    'SESSION_DRIVER'             => 'array',
-    'QUEUE_CONNECTION'           => 'sync',
-    'VIEW_COMPILED_PATH'         => '/tmp/views',
-];
+// 1. Definisikan start time (karena kita bypass public/index.php)
+define('LARAVEL_START', microtime(true));
 
-foreach ($overrides as $key => $value) {
+// 2. Set environment overrides secara eksplisit
+$_ENV['APP_ENV'] = 'production';
+$_ENV['APP_DEBUG'] = 'false';
+$_ENV['LOG_CHANNEL'] = 'stderr';    // Log ke Vercel runtime logs
+$_ENV['CACHE_STORE'] = 'array';     // Gunakan memory untuk cache
+$_ENV['SESSION_DRIVER'] = 'array';  // Gunakan memory untuk session
+$_ENV['QUEUE_CONNECTION'] = 'sync';
+$_ENV['VIEW_COMPILED_PATH'] = '/tmp/storage/framework/views';
+
+foreach ($_ENV as $key => $value) {
     putenv("{$key}={$value}");
-    $_ENV[$key]    = $value;
     $_SERVER[$key] = $value;
 }
 
-// ─── LANGKAH 2: Buat semua direktori /tmp yang dibutuhkan Laravel ────────────
-// Vercel filesystem bersifat read-only kecuali /tmp
-$tmpDirs = [
-    '/tmp/views',
-    '/tmp/framework/cache/data',
-    '/tmp/framework/sessions',
-    '/tmp/framework/testing',
-    '/tmp/app/public',
-    '/tmp/logs',
+// 3. Buat struktur folder storage di memori sementara (/tmp) milik Vercel
+$tmpStorageDirs = [
+    '/tmp/storage/framework/cache/data',
+    '/tmp/storage/framework/sessions',
+    '/tmp/storage/framework/views',
+    '/tmp/storage/framework/testing',
+    '/tmp/storage/logs',
+    '/tmp/storage/app/public',
 ];
 
-foreach ($tmpDirs as $dir) {
+foreach ($tmpStorageDirs as $dir) {
     if (!is_dir($dir)) {
-        @mkdir($dir, 0775, true);
+        @mkdir($dir, 0777, true);
     }
 }
 
-// ─── LANGKAH 3: Boot Laravel via public/index.php ───────────────────────────
-require __DIR__ . '/../public/index.php';
+// 4. Load Composer Autoloader
+require __DIR__.'/../vendor/autoload.php';
+
+// 5. Bootstrap Laravel
+$app = require_once __DIR__.'/../bootstrap/app.php';
+
+// 6. PAKSA Laravel untuk menggunakan /tmp/storage daripada folder asli!
+$app->useStoragePath('/tmp/storage');
+
+// 7. Handle Request
+$app->handleRequest(Illuminate\Http\Request::capture());

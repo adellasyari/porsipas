@@ -9,8 +9,8 @@
 define('LARAVEL_START', microtime(true));
 
 // 2. Set environment overrides secara eksplisit
-$_ENV['APP_ENV'] = 'production';
-$_ENV['APP_DEBUG'] = 'false';
+$_ENV['APP_ENV'] = 'local';
+$_ENV['APP_DEBUG'] = 'true';
 $_ENV['LOG_CHANNEL'] = 'stderr';    // Log ke Vercel runtime logs
 $_ENV['CACHE_STORE'] = 'array';     // Gunakan memory untuk cache
 $_ENV['SESSION_DRIVER'] = 'array';  // Gunakan memory untuk session
